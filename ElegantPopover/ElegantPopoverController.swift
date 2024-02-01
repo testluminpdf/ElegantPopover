@@ -21,6 +21,9 @@ public class ElegantPopoverController: UIViewController, UIPopoverPresentationCo
     /// An object used for defining visual attributes of the popover.
     private var design: PSDesign!
     
+    /// An object used for defining shadow attributes of the popover.
+    private var shadow: PSShadow?
+
     /// Popover presentation controller of the popover
     private var popover: UIPopoverPresentationController!
     
@@ -39,10 +42,11 @@ public class ElegantPopoverController: UIViewController, UIPopoverPresentationCo
      
      Assign a value to `barButton` to anchor the popover to the specified bar button item. When presented, the popover’s arrow points to the specified item. Alternatively, you may specify the anchor location for the popover using the `sourceView` and `sourceRect` properties.
      */
-    public init(contentView: UIView, design: PSDesign, arrow: PSArrow, sourceView: UIView? = nil, sourceRect: CGRect? = nil, barButtonItem: UIBarButtonItem? = nil) {
+    public init(contentView: UIView, design: PSDesign, arrow: PSArrow, shadow: PSShadow? = nil, sourceView: UIView? = nil, sourceRect: CGRect? = nil, barButtonItem: UIBarButtonItem? = nil) {
         self.contentView = contentView
         self.arrow = arrow
         self.design = design
+        self.shadow = shadow
         super.init(nibName: nil, bundle: nil)
         setupPopover(sourceView, sourceRect, barButtonItem)
     }
@@ -157,6 +161,11 @@ public class ElegantPopoverController: UIViewController, UIPopoverPresentationCo
     // Returns arrow of the popover
     func getArrow() -> PSArrow {
         return arrow
+    }
+    
+    // Returns shadow of the popover
+    func getShadow() -> PSShadow? {
+        return shadow
     }
     
     // Returns presentation controller of the popover

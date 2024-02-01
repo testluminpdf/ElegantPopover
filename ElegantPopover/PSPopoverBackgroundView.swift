@@ -44,6 +44,7 @@ class PSPopoverBackgroundView: UIPopoverBackgroundView {
     private var subRect: CGRect!
     private var design: PSDesign!
     private var elegantArrow: PSArrow!
+    private var shadow: PSShadow?
     private var startPoint: CGPoint!
     private var popoverBounds: CGRect!
     
@@ -59,6 +60,9 @@ class PSPopoverBackgroundView: UIPopoverBackgroundView {
         return arrow.apex.x - arrow.halfBase - arrow.leftCurveRadius * tan(arcAngle/2)
     }
     
+    private let containerLayer: CALayer = CALayer()
+    private let shadowLayer: CALayer = CALayer()
+
     override var arrowOffset: CGFloat {
         get {
             return self.arrowOffset
@@ -83,6 +87,10 @@ class PSPopoverBackgroundView: UIPopoverBackgroundView {
         backgroundColor = UIColor.clear
         self.design = PSPopoverBackgroundView.currPopover?.getDesign()
         self.elegantArrow = PSPopoverBackgroundView.currPopover?.getArrow()
+        self.shadow = PSPopoverBackgroundView.currPopover?.getShadow()
+        self.layer.addSublayer(self.shadowLayer)
+        self.layer.addSublayer(self.containerLayer)
+        self.layer.masksToBounds = false
         layer.shadowColor = UIColor.clear.cgColor
     }
     
@@ -107,15 +115,27 @@ class PSPopoverBackgroundView: UIPopoverBackgroundView {
         if #available(iOS 13, *) {
             // iOS 13 (or newer)
             if let window = UIApplication.shared.keyWindow {
-                let transitionViews = window.subviews.filter { String(describing: type(of: $0)) == "UITransitionView" }
-                for transitionView in transitionViews {
-                    let shadowView = transitionView.subviews.filter { String(describing: type(of: $0)) == "_UICutoutShadowView" }.first
-                    shadowView?.isHidden = true
-                }
+                self.hideShadowViewRecursively(in: window)
+//                let transitionViews = window.subviews.filter { String(describing: type(of: $0)) == "UITransitionView" }
+//                for transitionView in transitionViews {
+//                    let shadowView = transitionView.subviews.filter { String(describing: type(of: $0)) == "_UICutoutShadowView" }.first
+//                    shadowView?.isHidden = true
+//                }
             }
         }
     }
     
+    func hideShadowViewRecursively(in view: UIView) {
+        for subview in view.subviews {
+            if String(describing: type(of: subview)) == "_UICutoutShadowView" {
+                subview.isHidden = true;
+                return
+            } else {
+                self.hideShadowViewRecursively(in: subview)
+            }
+        }
+    }
+        
     private func initialize(inset: CGFloat, borderWidth: CGFloat) {
         path = UIBezierPath()
         cornerRadius -= borderWidth
@@ -172,6 +192,8 @@ class PSPopoverBackgroundView: UIPopoverBackgroundView {
         drawPopover()
         rotatePath(using: rect)
         
+        fillShadow(with: shadow)
+
         popoverBounds = path.bounds
         
         var cumulativeBorders = design.borders
@@ -243,12 +265,31 @@ class PSPopoverBackgroundView: UIPopoverBackgroundView {
         let shapeLayer = CAShapeLayer()
         shapeLayer.path = path.cgPath
         layerToBeInserted.mask = shapeLayer
-        
+
         if popoverBounds == path.bounds {
-            self.layer.mask = shapeLayer
+            self.containerLayer.mask = shapeLayer
         }
         
-        self.layer.insertSublayer(layerToBeInserted, at: UInt32(self.layer.sublayers?.count ?? 0))
+        self.containerLayer.insertSublayer(layerToBeInserted, at: UInt32(self.containerLayer.sublayers?.count ?? 0))
+    }
+    
+    private func fillShadow(with shadow: PSShadow?) {
+        guard let shadow = shadow else { return }
+        self.shadowLayer.shadowOffset = shadow.shadowOffset
+        self.shadowLayer.shadowOpacity = shadow.shadowOpacity
+        self.shadowLayer.shadowRadius = shadow.shadowRadius
+        self.shadowLayer.shadowColor = shadow.shadowColor?.cgColor
+        self.shadowLayer.shadowOffset = shadow.shadowOffset
+        self.shadowLayer.masksToBounds = false
+        if shadow.shadowSpread == 0 {
+            self.shadowLayer.shadowPath = self.path.cgPath
+        } else {
+            let originPath = self.path
+            let inset = -shadow.shadowSpread
+            drawPopover(inset: inset)
+            self.shadowLayer.shadowPath = self.path.cgPath
+            self.path = originPath
+        }
     }
     
     private func drawLeftLine() {

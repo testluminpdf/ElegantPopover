@@ -15,6 +15,9 @@ public class ElegantPopoverController: UIViewController, UIPopoverPresentationCo
     /// The view to be inserted inside the popover
     private var contentView: UIView!
     
+    /// The view controller to be inserted inside the popover
+    private var contentViewController: UIViewController?
+    
     /// An object representing the arrow of the popover.
     private var arrow: PSArrow
     
@@ -50,6 +53,17 @@ public class ElegantPopoverController: UIViewController, UIPopoverPresentationCo
         super.init(nibName: nil, bundle: nil)
         setupPopover(sourceView, sourceRect, barButtonItem)
     }
+    
+    public init(contentViewController: UIViewController, design: PSDesign, arrow: PSArrow, shadow: PSShadow? = nil, sourceView: UIView? = nil, sourceRect: CGRect? = nil, barButtonItem: UIBarButtonItem? = nil) {
+        self.contentView = contentViewController.view
+        self.contentViewController = contentViewController
+        self.arrow = arrow
+        self.design = design
+        self.shadow = shadow
+        super.init(nibName: nil, bundle: nil)
+        setupPopover(sourceView, sourceRect, barButtonItem)
+    }
+
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -107,8 +121,13 @@ public class ElegantPopoverController: UIViewController, UIPopoverPresentationCo
         
         PSPopoverBackgroundView.currPopover = self
         self.modalPresentationStyle = .popover
-        self.view.addSubview(contentView)
         
+        contentViewController?.willMove(toParentViewController: self)
+        self.view.addSubview(contentView)
+        if let contentViewController = contentViewController {
+            addChildViewController(contentViewController)
+        }
+        contentViewController?.didMove(toParentViewController: self)
         
         let popOver = self.popoverPresentationController!
         popOver.popoverBackgroundViewClass = PSPopoverBackgroundView.self

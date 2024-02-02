@@ -13,10 +13,10 @@ import UIKit
 public class ElegantPopoverController: UIViewController, UIPopoverPresentationControllerDelegate {
     
     /// The view to be inserted inside the popover
-    private var contentView: UIView!
+    let contentView: UIView!
     
     /// The view controller to be inserted inside the popover
-    private var contentViewController: UIViewController?
+    let contentViewController: UIViewController?
     
     /// An object representing the arrow of the popover.
     private var arrow: PSArrow
@@ -50,6 +50,7 @@ public class ElegantPopoverController: UIViewController, UIPopoverPresentationCo
         self.arrow = arrow
         self.design = design
         self.shadow = shadow
+        self.contentViewController = nil
         super.init(nibName: nil, bundle: nil)
         setupPopover(sourceView, sourceRect, barButtonItem)
     }
@@ -72,8 +73,10 @@ public class ElegantPopoverController: UIViewController, UIPopoverPresentationCo
     override public func viewDidLoad() {
         super.viewDidLoad()
     }
-    
+        
     override public func viewDidLayoutSubviews() {
+        // Turn off default corner radius
+        self.view.superview?.layer.cornerRadius = 0
         
         switch arrow.direction {
         case .left:

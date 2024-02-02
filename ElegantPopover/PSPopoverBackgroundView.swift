@@ -135,6 +135,12 @@ class PSPopoverBackgroundView: UIPopoverBackgroundView {
             }
         }
     }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        self.containerLayer.frame = self.layer.bounds
+        layoutLayers()
+    }
         
     private func initialize(inset: CGFloat, borderWidth: CGFloat) {
         path = UIBezierPath()
@@ -178,8 +184,8 @@ class PSPopoverBackgroundView: UIPopoverBackgroundView {
 
     }
     
-    override func draw(_ rect: CGRect) {
-        
+    func layoutLayers() {
+        let rect = self.bounds
         cornerRadius = design.cornerRadius
         if _arrowDirection! == .up || _arrowDirection! == .down {
             mainRect = rect
@@ -221,6 +227,11 @@ class PSPopoverBackgroundView: UIPopoverBackgroundView {
                     shouldDrawArrow: design.solidArrowBorderIndex == nil || borders.count <= design.solidArrowBorderIndex!)
         rotatePath(using: rect)
         fillPath(with: .pureColor(design.backGroundColor))
+
+    }
+    
+    override func draw(_ rect: CGRect) {
+        layoutLayers()
     }
     
     private func drawPopover(inset: CGFloat = 0, borderWidth: CGFloat = 0, shouldDrawArrow: Bool = true) {
@@ -267,6 +278,10 @@ class PSPopoverBackgroundView: UIPopoverBackgroundView {
         layerToBeInserted.mask = shapeLayer
 
         if popoverBounds == path.bounds {
+            let newShapeLayer = CAShapeLayer()
+            newShapeLayer.path = path.cgPath
+            newShapeLayer.frame = popoverBounds
+            PSPopoverBackgroundView.currPopover?.contentView.layer.mask = newShapeLayer
             self.containerLayer.mask = shapeLayer
         }
         

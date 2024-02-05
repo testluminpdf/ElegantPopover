@@ -13,7 +13,7 @@ import UIKit
 public class ElegantPopoverController: UIViewController, UIPopoverPresentationControllerDelegate {
     
     /// The view to be inserted inside the popover
-    private var contentView: UIView!
+    public private(set) var contentView: UIView!
     
     /// The view controller to be inserted inside the popover
     public private(set) var contentViewController: UIViewController?
@@ -80,6 +80,10 @@ public class ElegantPopoverController: UIViewController, UIPopoverPresentationCo
     }
     
     override public func viewDidLayoutSubviews() {
+        // Turn off default corner radius
+        self.view.superview?.layer.cornerRadius = 0
+        
+        contentView.frame.size = self.popoverContentSize
         
         switch arrow.direction {
         case .left:

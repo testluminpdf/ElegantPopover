@@ -80,11 +80,9 @@ public class ElegantPopoverController: UIViewController, UIPopoverPresentationCo
     }
     
     override public func viewDidLayoutSubviews() {
-        // Turn off default corner radius
         self.view.superview?.layer.cornerRadius = 0
-        
-        contentView.frame.size = self.popoverContentSize
-        
+        self.contentView.frame.size = self.popoverContentSize
+
         switch arrow.direction {
         case .left:
             contentView.frame.origin = CGPoint(x: design.insets.left + arrow.height, y: design.insets.top)

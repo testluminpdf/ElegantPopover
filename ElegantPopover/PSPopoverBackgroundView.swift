@@ -278,10 +278,12 @@ class PSPopoverBackgroundView: UIPopoverBackgroundView {
         layerToBeInserted.mask = shapeLayer
 
         if popoverBounds == path.bounds {
-            let newShapeLayer = CAShapeLayer()
-            newShapeLayer.path = path.cgPath
-            newShapeLayer.frame = popoverBounds
-            PSPopoverBackgroundView.currPopover?.contentView.layer.mask = newShapeLayer
+            if let contentView = PSPopoverBackgroundView.currPopover?.contentView {
+                let newShapeLayer = CAShapeLayer()
+                newShapeLayer.path = UIBezierPath(roundedRect: contentView.bounds, cornerRadius: design.cornerRadius).cgPath
+                newShapeLayer.frame = contentView.bounds
+                contentView.layer.mask = newShapeLayer
+            }
             self.containerLayer.mask = shapeLayer
         }
         

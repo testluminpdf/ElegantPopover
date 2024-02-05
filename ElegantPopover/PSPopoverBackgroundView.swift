@@ -38,7 +38,7 @@ open class PSPopoverBackgroundView: UIPopoverBackgroundView {
     private var path : UIBezierPath!
     private var arrow: Arrow!
     private var cornerRadius: CGFloat!
-    private var _arrowDirection : UIPopoverArrowDirection!
+    private var _arrowDirection : UIPopoverArrowDirection! = .any
     private var _arrowOffset : CGFloat!
     private var mainRect: CGRect!
     private var subRect: CGRect!
@@ -74,7 +74,21 @@ open class PSPopoverBackgroundView: UIPopoverBackgroundView {
     
     open override var arrowDirection: UIPopoverArrowDirection {
         get {
-            return UIPopoverArrowDirection.any
+            var string = "any"
+            switch self._arrowDirection {
+            case UIPopoverArrowDirection.left:
+                string = "left"
+            case UIPopoverArrowDirection.right:
+                string = "right"
+            case UIPopoverArrowDirection.up:
+                string = "up"
+            case UIPopoverArrowDirection.down:
+                string = "down"
+            default:
+                string = "any"
+            }
+            print("arrowDirection: \(string)")
+            return self._arrowDirection
         }
         set {
             self._arrowDirection = newValue
@@ -140,6 +154,19 @@ open class PSPopoverBackgroundView: UIPopoverBackgroundView {
         super.layoutSubviews()
         self.containerLayer.frame = self.layer.bounds
         layoutLayers()
+        
+        if let contentView = self.findContentViewController()?.view {
+            switch self.arrowDirection {
+            case .left:
+                contentView.frame.origin = CGPoint(x: design.insets.left + arrow.height, y: design.insets.top)
+            case .right, .down:
+                contentView.frame.origin = CGPoint(x: design.insets.left, y: design.insets.top)
+            case .up:
+                contentView.frame.origin = CGPoint(x: design.insets.left, y: design.insets.top + arrow.height)
+            default:
+                break
+            }
+        }
     }
         
     private func initialize(inset: CGFloat, borderWidth: CGFloat) {
@@ -184,7 +211,7 @@ open class PSPopoverBackgroundView: UIPopoverBackgroundView {
 
     }
     
-    func layoutLayers() {
+    open func layoutLayers() {
         let rect = self.bounds
         cornerRadius = design.cornerRadius
         if _arrowDirection! == .up || _arrowDirection! == .down {
@@ -229,11 +256,7 @@ open class PSPopoverBackgroundView: UIPopoverBackgroundView {
         fillPath(with: .pureColor(design.backGroundColor))
 
     }
-    
-    open override func draw(_ rect: CGRect) {
-        layoutLayers()
-    }
-    
+        
     private func drawPopover(inset: CGFloat = 0, borderWidth: CGFloat = 0, shouldDrawArrow: Bool = true) {
         initialize(inset: inset, borderWidth: borderWidth)
         drawLeftLine()
@@ -291,6 +314,15 @@ open class PSPopoverBackgroundView: UIPopoverBackgroundView {
         }
         
         self.containerLayer.insertSublayer(layerToBeInserted, at: UInt32(self.containerLayer.sublayers?.count ?? 0))
+    }
+    
+    private func findContentViewController() -> UIViewController? {
+        if let superview = superview,
+           let contentViewController = findContentViewController(in: superview) {
+            return contentViewController
+        } else {
+            return nil
+        }
     }
     
     private func findContentViewController(in view: UIView) -> UIViewController? {

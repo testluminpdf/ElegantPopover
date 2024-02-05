@@ -13,10 +13,10 @@ import UIKit
 public class ElegantPopoverController: UIViewController, UIPopoverPresentationControllerDelegate {
     
     /// The view to be inserted inside the popover
-    let contentView: UIView!
+    private var contentView: UIView!
     
     /// The view controller to be inserted inside the popover
-    let contentViewController: UIViewController?
+    public private(set) var contentViewController: UIViewController?
     
     /// An object representing the arrow of the popover.
     private var arrow: PSArrow
@@ -26,12 +26,18 @@ public class ElegantPopoverController: UIViewController, UIPopoverPresentationCo
     
     /// An object used for defining shadow attributes of the popover.
     private var shadow: PSShadow?
-
+    
     /// Popover presentation controller of the popover
     private var popover: UIPopoverPresentationController!
     
+    public var popoverContentSize: CGSize = CGSize(width: 200, height: 200) {
+        didSet {
+            self.updatePreferredContentSize(direction: self.arrow.direction)
+        }
+    }
+    
     public var popoverSize: CGSize {
-        return CGSize(width: contentView.frame.width + design.insets.left + design.insets.right, height: contentView.frame.height + design.insets.top + design.insets.bottom)
+        return CGSize(width: popoverContentSize.width + design.insets.left + design.insets.right, height: popoverContentSize.height + design.insets.top + design.insets.bottom)
     }
     
     /**
@@ -50,7 +56,6 @@ public class ElegantPopoverController: UIViewController, UIPopoverPresentationCo
         self.arrow = arrow
         self.design = design
         self.shadow = shadow
-        self.contentViewController = nil
         super.init(nibName: nil, bundle: nil)
         setupPopover(sourceView, sourceRect, barButtonItem)
     }
@@ -64,7 +69,7 @@ public class ElegantPopoverController: UIViewController, UIPopoverPresentationCo
         super.init(nibName: nil, bundle: nil)
         setupPopover(sourceView, sourceRect, barButtonItem)
     }
-
+    
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -73,10 +78,8 @@ public class ElegantPopoverController: UIViewController, UIPopoverPresentationCo
     override public func viewDidLoad() {
         super.viewDidLoad()
     }
-        
+    
     override public func viewDidLayoutSubviews() {
-        // Turn off default corner radius
-        self.view.superview?.layer.cornerRadius = 0
         
         switch arrow.direction {
         case .left:
@@ -159,6 +162,10 @@ public class ElegantPopoverController: UIViewController, UIPopoverPresentationCo
     
     func setArrowDirection(_ direction: UIPopoverArrowDirection) {
         arrow.direction = direction
+        updatePreferredContentSize(direction: direction)
+    }
+    
+    func updatePreferredContentSize(direction: UIPopoverArrowDirection) {
         preferredContentSize = popoverSize
         
         switch direction {

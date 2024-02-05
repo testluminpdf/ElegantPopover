@@ -10,7 +10,7 @@
 import UIKit
 import ClippingBezier
 
-class PSPopoverBackgroundView: UIPopoverBackgroundView {
+open class PSPopoverBackgroundView: UIPopoverBackgroundView {
     
     private struct Arrow {
         var height: CGFloat!
@@ -63,7 +63,7 @@ class PSPopoverBackgroundView: UIPopoverBackgroundView {
     private let containerLayer: CALayer = CALayer()
     private let shadowLayer: CALayer = CALayer()
 
-    override var arrowOffset: CGFloat {
+    open override var arrowOffset: CGFloat {
         get {
             return self.arrowOffset
         }
@@ -72,7 +72,7 @@ class PSPopoverBackgroundView: UIPopoverBackgroundView {
         }
     }
     
-    override var arrowDirection: UIPopoverArrowDirection {
+    open override var arrowDirection: UIPopoverArrowDirection {
         get {
             return UIPopoverArrowDirection.any
         }
@@ -82,7 +82,7 @@ class PSPopoverBackgroundView: UIPopoverBackgroundView {
         }
     }
     
-    override init(frame: CGRect) {
+    public override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = UIColor.clear
         self.design = PSPopoverBackgroundView.currPopover?.getDesign()
@@ -94,23 +94,23 @@ class PSPopoverBackgroundView: UIPopoverBackgroundView {
         layer.shadowColor = UIColor.clear.cgColor
     }
     
-    required init(coder aDecoder: NSCoder) {
+    required public init(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override class func contentViewInsets() -> UIEdgeInsets{
+    open override class func contentViewInsets() -> UIEdgeInsets{
         return UIEdgeInsets.zero
     }
     
-    override class func arrowHeight() -> CGFloat {
+    open override class func arrowHeight() -> CGFloat {
         return 0
     }
     
-    override class func arrowBase() -> CGFloat{
+    open override class func arrowBase() -> CGFloat{
         return 0
     }
     
-    override func didMoveToWindow() {
+    open override func didMoveToWindow() {
         super.didMoveToWindow()
         if #available(iOS 13, *) {
             // iOS 13 (or newer)
@@ -136,7 +136,7 @@ class PSPopoverBackgroundView: UIPopoverBackgroundView {
         }
     }
     
-    override func layoutSubviews() {
+    open override func layoutSubviews() {
         super.layoutSubviews()
         self.containerLayer.frame = self.layer.bounds
         layoutLayers()
@@ -230,7 +230,7 @@ class PSPopoverBackgroundView: UIPopoverBackgroundView {
 
     }
     
-    override func draw(_ rect: CGRect) {
+    open override func draw(_ rect: CGRect) {
         layoutLayers()
     }
     
@@ -278,7 +278,11 @@ class PSPopoverBackgroundView: UIPopoverBackgroundView {
         layerToBeInserted.mask = shapeLayer
 
         if popoverBounds == path.bounds {
-            if let contentView = PSPopoverBackgroundView.currPopover?.contentView {
+            if let contentView = self.superview?.subviews.first(where: { ele in
+                return ele.subviews.count > 0
+            })?.subviews.first(where: { ele in
+                return ele.subviews.count > 0
+            })?.subviews.first {
                 let newShapeLayer = CAShapeLayer()
                 newShapeLayer.path = UIBezierPath(roundedRect: contentView.bounds, cornerRadius: design.cornerRadius).cgPath
                 newShapeLayer.frame = contentView.bounds

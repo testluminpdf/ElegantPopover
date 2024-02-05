@@ -42,9 +42,9 @@ open class PSPopoverBackgroundView: UIPopoverBackgroundView {
     private var _arrowOffset : CGFloat!
     private var mainRect: CGRect!
     private var subRect: CGRect!
-    private var design: PSDesign!
-    private var elegantArrow: PSArrow!
-    private var shadow: PSShadow?
+    open var design: PSDesign!
+    open var elegantArrow: PSArrow!
+    open var shadow: PSShadow?
     private var startPoint: CGPoint!
     private var popoverBounds: CGRect!
     

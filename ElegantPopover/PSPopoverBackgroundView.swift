@@ -278,20 +278,35 @@ open class PSPopoverBackgroundView: UIPopoverBackgroundView {
         layerToBeInserted.mask = shapeLayer
 
         if popoverBounds == path.bounds {
-            if let contentView = self.superview?.subviews.first(where: { ele in
-                return ele.subviews.count > 0
-            })?.subviews.first(where: { ele in
-                return ele.subviews.count > 0
-            })?.subviews.first {
+            if let superview = superview,
+               let contentViewController = findContentViewController(in: superview),
+               let contentView = contentViewController.view {
                 let newShapeLayer = CAShapeLayer()
-                newShapeLayer.path = UIBezierPath(roundedRect: contentView.bounds, cornerRadius: design.cornerRadius).cgPath
+                newShapeLayer.path = self.path.cgPath
                 newShapeLayer.frame = contentView.bounds
                 contentView.layer.mask = newShapeLayer
             }
+
             self.containerLayer.mask = shapeLayer
         }
         
         self.containerLayer.insertSublayer(layerToBeInserted, at: UInt32(self.containerLayer.sublayers?.count ?? 0))
+    }
+    
+    private func findContentViewController(in view: UIView) -> UIViewController? {
+        return findContentViewControllerRecursively(in: view)
+    }
+    
+    private func findContentViewControllerRecursively(in view: UIView) -> UIViewController? {
+        if let viewController = view.next as? UIViewController {
+            return viewController
+        }
+        for subview in view.subviews {
+            if let viewController = self.findContentViewControllerRecursively(in: subview) {
+                return viewController
+            }
+        }
+        return nil
     }
     
     private func fillShadow(with shadow: PSShadow?) {
